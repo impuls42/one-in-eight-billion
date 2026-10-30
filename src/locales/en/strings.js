@@ -2011,4 +2011,9 @@ export default {
   "市场下跌": "The market fell",
   "今年的市场上涨了 {idx}%。{x}": "The market rose {idx}% this year. {x}",
   "今年的市场下跌了 {idx}%。{x}": "The market fell {idx}% this year. {x}",
+  // app.js: minimized choice
+  "收起": "Minimize",
+  "收起选择，先看看再决定": "Minimize this choice and look around first",
+  "等你做选择": "Waiting for your choice",
+  "展开选择": "Show choices",
 };
