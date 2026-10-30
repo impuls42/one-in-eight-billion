@@ -1,6 +1,6 @@
 import { initSystems, systemsYear, systemChoice, systemAction, peopleMilestone } from './life-systems.js';
 import { initEducation, educationYear, educationMilestone, educationChoice } from './education.js';
-import { initFinance, financeYear, creditBlocked } from './finance.js';
+import { initFinance, financeYear, creditBlocked, familyCovers } from './finance.js';
 import { careerAction, careerYear } from './career.js';
 import { tr, label, setPlayer } from './i18n.js';
 import { personName } from './names.js';
@@ -117,7 +117,8 @@ function initialInvestments(){return {index:0,bonds:0,property:0};}
 export function upgradeLife(life){
  if(!life||typeof life!=='object')return life;
  if(life.money==null)life.money=0;
- if(life.money<0){life.debt=(life.debt||0)-life.money;life.money=0;}
+ if(life.money<0){if(life.age<18)familyCovers(life,-life.money);else life.debt=(life.debt||0)-life.money;life.money=0;}
+ if(life.decisions==null)life.decisions=(life.log||[]).filter(e=>e.type==='consequence').length;
  life.debt=life.debt||0;
  life.investments=Object.assign(initialInvestments(),life.investments||{});
  life.market=life.market&&life.market.stocks?life.market:initialMarket();
@@ -172,7 +173,7 @@ export function createLife({era='now',mode='birth',seed=Date.now(),country,sex,n
    life:Math.round(clamp(cc.life+(roll(s)-.5)*30,35,108)),age:0,dead:false,job:'尚未工作'});
  }
  s.classBand=s.family.background;
-  log(s,tr('世界多了一个你'),tr('{birthYear}年，你出生在{name}{city}。对照当地人均 GDP，你家大约高于{wealth}%的家庭，更接近{background}。这是游戏里的分层，不是官方收入统计。父母给你取名{name2}。', {birthYear, name: c.name, city: c.city, wealth: Math.round(wealth*100), background: label(s.family.background), name2: s.name}),'birth');
+  log(s,tr('世界多了一个你'),tr('{birthYear}年，你出生在{name}{city}。对照当地人均 GDP，你家大约高于{wealth}%的家庭，更接近{background}。这是游戏里的分层，不是官方收入统计。父母给你取名{name2}。', {birthYear, name: c.name, city: c.city, wealth: Math.round(wealth*100), background: label(s.family.background), name2: s.name})+tr('家里为你留出了${money}：小时候生病、意外和你自己的选择都从这里花，吃住和上学用品由家里负担。', {money: s.money}),'birth');
  log(s,tr('同一秒的远方'),tr('另外四个孩子也在这个世界睁开眼睛。你们彼此陌生，却一起走进时间。'),'world');
  initSystems(s); initEducation(s); initFinance(s);
  return s;
@@ -209,7 +210,7 @@ function spend(life,amount){
   if(left<=0)break;
   const price=life.market.stocks[h.symbol]?.price||0;const shares=Math.min(h.shares,left/price);h.shares-=shares;left-=shares*price;if(h.shares<.0001)life.holdings.splice(life.holdings.indexOf(h),1);
  }
- if(left>0)addDebt(life,left);
+ if(left>0){if(life.age<18)familyCovers(life,left);else addDebt(life,left);}
 }
 function applyStats(life,effects,details){
  for(const k of ['health','happiness','knowledge','social']){
@@ -542,6 +543,7 @@ export function choose(life,index){
  upgradeLife(life);
  if(life.dead||!life.pending)return life;
  if(!Number.isInteger(index)||!life.pending.options[index])throw new RangeError(tr('选择不存在'));
+ life.decisions=(life.decisions||0)+1;
  const pending=life.pending;
  if(pending.kind==='education'){educationChoice(life,index);return life;}
  if(pending.kind==='system'){systemChoice(life,pending,index);return life;}
@@ -776,5 +778,5 @@ export function summarize(life){
  text:tr('{name}在{name2}走过{age}年，{education}，{job}。{x}每个平凡的选择，都留下了自己的痕迹。', {name: life.name, name2: life.country.name, age: life.age, education: label(life.education), job: label(life.job), x: life.children.length?tr('养育了{n}个孩子。', {n: life.children.length}):''}),
  country:life.country.name,score:Math.round(Object.values(life.stats).reduce((a,b)=>a+b,0)/4),money:nw,cash:life.money,invested:investedValue(life),debt:life.debt,
  education:life.education,job:life.job,children:life.children.length,travels:life.travels.length,house:!!life.house,
- highlights:life.log.filter(e=>['birth','consequence','death','travel','market'].includes(e.type)).slice(-8),dead:life.dead,deathCause:life.deathCause};
+ highlights:life.log.filter(e=>['birth','consequence','death','travel'].includes(e.type)).slice(-8),dead:life.dead,deathCause:life.deathCause};
 }
