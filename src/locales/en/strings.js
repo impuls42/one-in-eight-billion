@@ -1983,6 +1983,11 @@ export default {
   "NO.": "NO.",
   // added after review
   "家里为你留出了${money}：小时候生病、意外和你自己的选择都从这里花，吃住和上学用品由家里负担。": " Your family has set aside ${money} for you. Childhood illnesses, mishaps and your own choices are paid from it; food, a home and school supplies are on the family.",
+  // app.js: minimized choice
+  "收起": "Minimize",
+  "收起选择，先看看再决定": "Minimize this choice and look around first",
+  "等你做选择": "Waiting for your choice",
+  "展开选择": "Show choices",
   // app.js (upstream additions, November 2026)
   "一段完整人生大约 20–30 分钟。8× 倍速更快，也可以「跳到下个选择」。": "A whole life takes about 20–30 minutes. 8× speed is quicker, or you can “Skip to next choice.”",
   "平均寿命比{name}长{lifeGap}岁": "Life expectancy {lifeGap|# year|# years} longer than in {name}",
